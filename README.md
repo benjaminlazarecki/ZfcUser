@@ -104,31 +104,32 @@ Coming soon...
 1. If you do not already have a valid Zend\Db\Adapter\Adapter in your service
    manager configuration, put the following in `./config/autoload/database.local.php`:
 
-        <?php
+    ```php
+    <?php
+    $dbParams = array(
+        'database'  => 'changeme',
+        'username'  => 'changeme',
+        'password'  => 'changeme',
+        'hostname'  => 'changeme',
+    );
 
-        $dbParams = array(
-            'database'  => 'changeme',
-            'username'  => 'changeme',
-            'password'  => 'changeme',
-            'hostname'  => 'changeme',
-        );
-
-        return array(
-            'service_manager' => array(
-                'factories' => array(
-                    'Zend\Db\Adapter\Adapter' => function ($sm) use ($dbParams) {
-                        return new Zend\Db\Adapter\Adapter(array(
-                            'driver'    => 'pdo',
-                            'dsn'       => 'mysql:dbname='.$dbParams['database'].';host='.$dbParams['hostname'],
-                            'database'  => $dbParams['database'],
-                            'username'  => $dbParams['username'],
-                            'password'  => $dbParams['password'],
-                            'hostname'  => $dbParams['hostname'],
-                        ));
-                    },
-                ),
+    return array(
+        'service_manager' => array(
+            'factories' => array(
+                'Zend\Db\Adapter\Adapter' => function ($sm) use ($dbParams) {
+                    return new Zend\Db\Adapter\Adapter(array(
+                        'driver'    => 'pdo',
+                        'dsn'       => 'mysql:dbname='.$dbParams['database'].';host='.$dbParams['hostname'],
+                        'database'  => $dbParams['database'],
+                        'username'  => $dbParams['username'],
+                        'password'  => $dbParams['password'],
+                        'hostname'  => $dbParams['hostname'],
+                    ));
+                },
             ),
-        );
+        ),
+    );
+    ```
 
 Navigate to http://yourproject/user and you should land on a login page.
 
@@ -199,47 +200,3 @@ The following options are available:
 - **password_cost** - This should be an integer between 4 and 31. The number
   represents the base-2 logarithm of the iteration count used for hashing.
   Default is `10` (about 10 hashes per second on an i5).
-
-Changing Registration Captcha Element
--------------------------------------
-
-**NOTICE** These instrutions are currently out of date.
-
-By default, the user registration uses the Figlet captcha engine.  This is
-because it's the only one that doesn't require API keys.  It's possible to change
-out the captcha engine with DI.  For example, to change to Recaptcha, you would
-add this to one of your configuration files (global.config.php,
-module.config.php, or a dedicated recaptcha.config.php):
-
-    <?php
-    // ./config/autoload/recaptcha.config.php
-    return array(
-        'di'=> array(
-            'instance'=>array(
-                'alias'=>array(
-                    // OTHER ELEMENTS....
-                    'recaptcha_element' => 'Zend\Form\Element\Captcha',
-                ),
-                'recaptcha_element' => array(
-                    'parameters' => array(
-                        'spec' => 'captcha',
-                        'options'=>array(
-                            'label'      => '',
-                            'required'   => true,
-                            'order'      => 500,
-                            'captcha'    => array(
-                                'captcha' => 'ReCaptcha',
-                                'privkey' => RECAPTCHA_PRIVATE_KEY,
-                                'pubkey'  => RECAPTCHA_PUBLIC_KEY,
-                            ),
-                        ),
-                    ),
-                ),
-                'ZfcUser\Form\Register' => array(
-                    'parameters' => array(
-                        'captcha_element'=>'recaptcha_element',
-                    ),
-                ),
-            ),
-        ),
-    );
